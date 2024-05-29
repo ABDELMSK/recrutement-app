@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Job Listings</h1>
+    {% if request.user.user_type == 'recruiter' %}
+        <h2><a href="{% url 'job_create' %}" class="btn btn-primary">Create New Job as Recruiter</a></h2>
+    {% else %}
+        <h2>You are an Applicant</h2>
+    {% endif %}
+    <h2><a href="{% url 'logout' %}" class="btn btn-secondary">Logout Here</a></h2>
+    <hr>
+    {% if jobs %}
+        {% for job in jobs %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title">{{ job.title }}</h2>
+                    <p class="card-text"><strong>Company:</strong> {{ job.company }}</p>
+                    <!-- Add more job details here if needed -->
+                    <p class="card-text">{{ job.description }}</p>
+                    <a href="{% url 'job_detail' job.pk %}" class="btn btn-info">View Details</a>
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'recruiter' %}
+                            <a href="{% url 'job_update' job.pk %}" class="btn btn-warning">Edit</a>
+                            <form action="{% url 'job_delete' job.pk %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this job?')">Delete</button>
+                            </form>
+                        {% elif user.user_type == 'applicant' %}
+                            <a href="{% url 'apply_to_job' job.id %}" class="btn btn-secondary mt-2">Apply</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No jobs found.</p>
+    {% endif %}
+</div>
+{% endblock content %}
